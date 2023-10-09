@@ -1,0 +1,15 @@
+[project]
+name = "wab.hello-world"
+version = "1.0.0"
+description = "Simple hello world service"
+authors = [
+    {name = "David Dostál", email = "xdostal8@mendelu.cz"},
+]
+dependencies = [
+    "fastapi>=0.103.2",
+    "uvicorn[standard]>=0.23.2",
+]
+requires-python = ">=3.11"
+readme = "README.md"
+license = {text = "MIT"}
+
