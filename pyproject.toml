@@ -13,3 +13,6 @@ requires-python = ">=3.11"
 readme = "README.md"
 license = {text = "MIT"}
 
+[tool.pdm.scripts]
+dev = "uvicorn main:app --reload"
+test = "pytest"
