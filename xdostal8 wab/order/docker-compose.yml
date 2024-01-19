@@ -1,0 +1,24 @@
+version: '3.8'
+services:
+  grpc-service:
+    build: ./grpc-service
+    ports:
+      - "50051:50051"
+
+  fastapi-service:
+    build: ./fastapi-service
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+  db:
+    image: postgres
+    environment:
+      POSTGRES_DB: yourdbname
+      POSTGRES_USER: youruser
+      POSTGRES_PASSWORD: yourpassword
+    volumes:
+      - ./postgres/initdb.d/order.sql:/docker-entrypoint-initdb.d/order.sql
+    ports:
+      - "5432:5432"
