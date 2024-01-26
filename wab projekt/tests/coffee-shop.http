@@ -1,0 +1,73 @@
+@host = http://localhost:8000
+@item_name = cibule
+@item_category = kudla
+
+@itemid = 65b273796305b8db9a083c85
+
+### List of items
+GET {{host}}/items
+Accept: application/json
+
+### Get item by category
+GET {{host}}/items/category/{{item_category}}
+Accept: application/json
+
+### Insert item 65b281b801569c558f1783b0
+POST {{host}}/new-item
+Accept: application/json
+Content-Type: application/json
+
+{
+    "name": "cibule",
+    "price_per_unit": 50.69,
+    "count" : 50,
+    "reserved" : 20,
+    "description": "krupava a chutna",
+    "category": "zelenina",
+    "available": true
+}
+
+### Insert item 65b281a101569c558f1783af
+POST {{host}}/new-item
+Accept: application/json
+Content-Type: application/json
+
+{
+    "name": "feferon",
+    "price_per_unit": 50.69,
+    "count" : 70,
+    "reserved" : 0,
+    "description": "krupava a chutna",
+    "category": "kudla",
+    "available": true
+}
+
+### Update item
+PUT {{host}}/item/65b281b801569c558f1783b0
+Accept: application/json
+Content-Type: application/json
+
+{
+    "name": "Updated Name",
+    "priceczk": 60.00,
+    "reserved" : 10,
+    "count": 30,
+    "description": "Updated description",
+    "category": "Updated category",
+    "available": false
+}
+
+### Delete item
+DELETE http://localhost:8000/item/65b281b801569c558f1783b0
+Accept: application/json
+
+### Insert items into cart
+POST http://localhost:8000/cart/item/add/user123/65b2bfb2b7423fe94b502042/10
+Accept: application/json
+
+### Empty cart
+
+DELETE http://localhost:8000/cart/user123
+Accept: application/json
+
+
