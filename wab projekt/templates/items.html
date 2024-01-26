@@ -42,6 +42,7 @@
                         }
                     }
                     alert('Items added to cart');
+                    window.location.reload(); // Reload the page to update the cart view
                 } catch (error) {
                     console.error('Failed to add items to cart', error);
                 }
@@ -53,6 +54,8 @@
     
 </head>
 <body>
+    <a href="/">Mainpage</a>
+
     {% if user %}
         <h1>Welcome, {{ user['name'] }}!</h1>
 

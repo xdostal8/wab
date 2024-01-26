@@ -21,3 +21,13 @@ services:
       ME_CONFIG_BASICAUTH_USERNAME: root
       ME_CONFIG_BASICAUTH_PASSWORD: example
       ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
+
+  fastapi_app:
+    environment:
+      - GOOGLE_CLIENT_ID=476984822533-s6526ehc2lbn5a0ma6clk6bbmepg5nb6.apps.googleusercontent.com
+      - GOOGLE_CLIENT_SECRET=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
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mongo

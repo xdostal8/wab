@@ -155,7 +155,7 @@ async def add_item_to_cart(item_id: str, quantity: int, user: dict = Depends(get
         # Check if item is already in the cart
         existing_item = next((i for i in cart['items'] if i['item_id'] == item_id), None)
         if existing_item:
-            existing_item['quantity'] += quantity
+            existing_item['count'] += quantity
         else:
             # Construct a CartItem with full item details
             cart_item = CartItem(

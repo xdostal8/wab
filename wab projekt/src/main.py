@@ -8,14 +8,13 @@ from starlette.responses import HTMLResponse, RedirectResponse
 from authlib.integrations.starlette_client import OAuth, OAuthError
 from authlib.integrations.starlette_client import OAuth
 from fastapi import HTTPException
-
-
+import os
 from .routes import router
 
 
 # OAuth settings
-GOOGLE_CLIENT_ID = "476984822533-s6526ehc2lbn5a0ma6clk6bbmepg5nb6.apps.googleusercontent.com"
-GOOGLE_CLIENT_SECRET = "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"
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 
 
 app = FastAPI()
@@ -63,7 +62,7 @@ async def homepage(request: Request):
                 <h1>Welcome, {user['name']}!</h1>
                 <a href="/logout">Logout</a><br>
                 <a href="/items">Show Items</a><br>
-                <a href="/cart/{user['sub']}">My Cart</a>
+                <a href="/cart/">My Cart</a>
             </body>
         </html>
         '''

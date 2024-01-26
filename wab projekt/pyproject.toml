@@ -1,9 +1,9 @@
 [project]
-name = ""
+name = "Item store service"
 version = ""
 description = ""
 authors = [
-    {name = "Jan Kolomazník", email = "jan.kolomaznik@gmail.com"},
+    {name = "David Dostal", email = "xdostal8@mendelu.cz"},
 ]
 dependencies = [
     "fastapi>=0.109.0",

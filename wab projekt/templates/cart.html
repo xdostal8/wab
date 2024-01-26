@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Your Cart</title>
     <script>
         async function clearCart() {
             try {
@@ -26,6 +25,11 @@
     </script>
 </head>
 <body>
+
+    <a href="/">Mainpage</a>
+
+    <title>Your Cart</title>
+
     <h1>Your Cart</h1>
     {% if user %}
         {% if cart['items'] %}
@@ -63,5 +67,6 @@
     {% else %}
         <p>Please <a href="/login">login</a> to view your cart.</p>
     {% endif %}
+
 </body>
 </html>
