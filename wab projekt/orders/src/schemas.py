@@ -4,34 +4,19 @@ from datetime import datetime
 from typing import List
 
 class OrderItemBase(BaseModel):
-    item_id: str  # Assuming item_id is a string in your data
+    item_id: str
     quantity: int
     unit_price: float
 
 class OrderItemCreate(BaseModel):
     item_id: str
-    name: str
-    quantity: int  # Changed from 'count' to 'quantity'
-    unit_price: float  # Changed from 'price_per_unit' to 'unit_price'
-    description: str = ""
-    category: str = ""
-    available: bool = False
-
+    quantity: int
+    unit_price: float
 
 class OrderItem(BaseModel):
     item_id: str
-    name: str
-    quantity: int = Field(alias='count')
-    unit_price: float = Field(alias='price_per_unit')
-    description: str = None
-    category: str = None
-    available: bool = True
-
-class OrderBase(BaseModel):
-    user_id: str  # Assuming user_id is a string
-    total_price: float
-    address: str
-
+    quantity: int
+    unit_price: float
 
 class OrderCreate(BaseModel):
     user_id: str
@@ -42,6 +27,12 @@ class OrderCreate(BaseModel):
 class Order(BaseModel):
     user_id: str
     items: List[OrderItem]
+    total_price: float
+    address: str
+
+
+class OrderBase(BaseModel):
+    user_id: str
     total_price: float
     address: str
 

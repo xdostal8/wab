@@ -1,20 +1,19 @@
-import json
-from fastapi import FastAPI, Depends
-from fastapi import APIRouter
+from fastapi import FastAPI
 from starlette.config import Config
 from starlette.requests import Request
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import HTMLResponse, RedirectResponse
 from authlib.integrations.starlette_client import OAuth, OAuthError
 from authlib.integrations.starlette_client import OAuth
-from fastapi import HTTPException
+from fastapi.templating import Jinja2Templates
 import os
 from .routes import router
+from starlette.config import Config
+
 
 # OAuth settings
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
-
 
 app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key="!secret")
@@ -28,11 +27,8 @@ config_data = {
     'GOOGLE_CLIENT_SECRET': GOOGLE_CLIENT_SECRET
 }
 
-from starlette.config import Config
 starlette_config = Config(environ=config_data)
-
 oauth = OAuth(starlette_config)
-
 
 CONF_URL = 'https://accounts.google.com/.well-known/openid-configuration'
 oauth.register(
@@ -45,41 +41,12 @@ oauth.register(
     }
 )
 
-
+templates = Jinja2Templates(directory="templates")
 
 @app.get('/')
 async def homepage(request: Request):
     user = request.session.get('user')
-    if user:
-        # User is logged in
-        html_content = f'''
-        <html>
-            <head>
-                <title>Home Page</title>
-            </head>
-            <body>
-                <h1>Welcome, {user['name']}!</h1>
-                <a href="/logout">Logout</a><br>
-                <a href="/items">Show Items</a><br>
-                <a href="/cart/">My Cart</a>
-            </body>
-        </html>
-        '''
-    else:
-        # User is not logged in
-        html_content = '''
-        <html>
-            <head>
-                <title>Home Page</title>
-            </head>
-            <body>
-                <h1>Welcome to the Item Store</h1>
-                <a href="/login">Login</a><br>
-                <a href="/items">Show Items</a>
-            </body>
-        </html>
-        '''
-    return HTMLResponse(content=html_content)
+    return templates.TemplateResponse("homepage.html", {"request": request, "user": user})
 
 
 

@@ -29,7 +29,7 @@ def start_rabbitmq_consumer():
     def on_message_callback(channel, method, properties, body):
         print("Received Order:", body)
         order_data = json.loads(body)
-        crud.process_order_from_message(order_data)  # Updated to use crud module
+        crud.process_order_from_message(order_data)
 
     channel.basic_consume(queue="orders", on_message_callback=on_message_callback, auto_ack=True)
     print("Starting consuming...")

@@ -1,6 +1,91 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Cart</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f8f9fa;
+        }
+        .button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .form-group {
+            margin-bottom: 10px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .navigation {
+            margin-bottom: 20px;
+        }
+        .navigation a {
+            text-decoration: none;
+            color: #007bff;
+            margin-right: 10px;
+        }
+        .navigation a:hover {
+            color: #0056b3;
+        }
+
+        .navigation {
+            background-color: #f8f9fa;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navigation a {
+            text-decoration: none;
+            color: #007bff;
+            margin-right: 10px;
+        }
+
+        .navigation a:hover {
+            color: #0056b3;
+        }
+
+        .logout-link {
+            margin-left: auto;
+        }
+    </style>
     <script>
         async function clearCart() {
             try {
@@ -41,7 +126,7 @@
 
                 if (response.ok) {
                     alert('Order created successfully.');
-                    window.location.href = '/order-confirmation'; // Redirect to confirmation page
+                    window.location.href = '/orders'; // Redirect to confirmation page
                 } else {
                     throw new Error('Failed to create order');
                 }
@@ -53,10 +138,7 @@
     </script>
 </head>
 <body>
-
-    <a href="/">Mainpage</a>
-
-    <title>Your Cart</title>
+    {% include 'navigation.html' %}
 
     <h1>Your Cart</h1>
     {% if user %}
@@ -87,21 +169,24 @@
                     {% endfor %}
                 </tbody>
             </table>
-            <button onclick="clearCart()">Clear Cart</button>
+            <button class="button" onclick="clearCart()">Clear Cart</button>
+            <br>
+            <br>
         {% else %}
             <p>Your cart is empty.</p>
         {% endif %}
-        <a href="/logout">Logout</a>
+        
+        {% if cart['items'] %}
+            <form id="orderForm" onsubmit="createOrder(event)">
+                <div class="form-group">
+                    <label for="address">Delivery Address:</label>
+                    <input type="text" id="address" name="address" required>
+                </div>
+                <button type="submit" class="button">Place Order</button>
+            </form>
+        {% endif %}
     {% else %}
         <p>Please <a href="/login">login</a> to view your cart.</p>
     {% endif %}
-    {% if user and cart['items'] %}
-        <form id="orderForm" onsubmit="createOrder(event)">
-            <label for="address">Delivery Address:</label>
-            <input type="text" id="address" name="address" required>
-            <button type="submit">Place Order</button>
-        </form>
-    {% endif %}
-
 </body>
 </html>

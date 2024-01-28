@@ -2,7 +2,7 @@
 @item_name = cibule
 @item_category = kudla
 
-@itemid = 65b273796305b8db9a083c85
+@itemid = 65b6b6d08d930e63e4300260
 
 ### List of items
 GET {{host}}/items
@@ -18,12 +18,12 @@ Accept: application/json
 Content-Type: application/json
 
 {
-    "name": "HAHAHAXDXD",
-    "price_per_unit": 50.69,
+    "name": "cucumber",
+    "price_per_unit": 5.10,
     "count" : 50,
-    "reserved" : 20,
-    "description": "krupava a chutna",
-    "category": "zelenina",
+    "reserved" : 0,
+    "description": "watery vegetable",
+    "category": "vegetable",
     "available": true
 }
 
@@ -33,23 +33,53 @@ Accept: application/json
 Content-Type: application/json
 
 {
-    "name": "feferon",
-    "price_per_unit": 50.69,
+    "name": "bread",
+    "price_per_unit": 10.20,
     "count" : 70,
     "reserved" : 0,
-    "description": "krupava a chutna",
-    "category": "kudla",
+    "description": "fresh",
+    "category": "bread",
     "available": true
 }
 
+### Insert item 65b281a101569c558f1783af
+POST {{host}}/new-item
+Accept: application/json
+Content-Type: application/json
+
+{
+    "name": "bread",
+    "price_per_unit": 10.20,
+    "count" : 70,
+    "reserved" : 0,
+    "description": "fresh",
+    "category": "bread",
+    "available": true
+}
+
+### Insert item 65b281a101569c558f1783af
+POST {{host}}/new-item
+Accept: application/json
+Content-Type: application/json
+
+{
+    "name": "test",
+    "price_per_unit": 100.20,
+    "count" : 0,
+    "reserved" : 0,
+    "description": "test",
+    "category": "test",
+    "available": false
+}
+
 ### Update item
-PUT {{host}}/item/65b281b801569c558f1783b0
+PUT {{host}}/item/{{itemid}}
 Accept: application/json
 Content-Type: application/json
 
 {
     "name": "Updated Name",
-    "priceczk": 60.00,
+    "price_per_unit": 60.00,
     "reserved" : 10,
     "count": 30,
     "description": "Updated description",
@@ -58,7 +88,7 @@ Content-Type: application/json
 }
 
 ### Delete item
-DELETE http://localhost:8000/item/65b281b801569c558f1783b0
+DELETE http://localhost:8000/item/65b6b6248d930e63e430025f
 Accept: application/json
 
 ### Insert items into cart

@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, Request
-
 from .database import db
 from .models import Item, Cart, CartItem, OrderAddress
 from fastapi.templating import Jinja2Templates
@@ -7,18 +6,16 @@ from fastapi.responses import HTMLResponse
 import json
 from bson import json_util
 from .rabbitmq import publish
-
 import grpc
 from . import orders_pb2
 from . import orders_pb2_grpc
-
+from bson import ObjectId
 
 
 
 
 
 router = APIRouter()
-
 templates = Jinja2Templates(directory="templates")
 
 
@@ -47,8 +44,6 @@ async def get_items_by_category(category_name: str) -> list[Item]:
 async def post_item(item: Item):
     response = db['items'].insert_one(item.dict())
     return {"id": str(response.inserted_id)}
-
-from bson import ObjectId
 
 @router.put('/item/{item_id}', status_code=200)
 async def update_item(item_id: str, item: Item):
@@ -123,8 +118,7 @@ from fastapi import HTTPException
 
 @router.delete('/cart')
 async def clear_cart(request: Request, user: dict = Depends(get_current_user)):
-    user_id = user['sub'] 
-    # Retrieve the cart
+    user_id = user['sub']
     cart = db['carts'].find_one({"user_id": user_id})
     if not cart:
         raise HTTPException(status_code=404, detail="Cart not found")
@@ -133,13 +127,12 @@ async def clear_cart(request: Request, user: dict = Depends(get_current_user)):
     for cart_item in cart['items']:
         item_id = cart_item['item_id']
         quantity = cart_item['count']
-        
-        # Retrieve the item from the database
         item = db['items'].find_one({"_id": ObjectId(item_id)})
         if item:
-            new_count = item['count'] + quantity
-            new_reserved = item['reserved'] - quantity
-            db['items'].update_one({"_id": ObjectId(item_id)}, {"$set": {"count": new_count, "reserved": new_reserved}})
+            # Update the count and reserved
+            db['items'].update_one({"_id": ObjectId(item_id)}, {
+                "$set": {"count": item['count'] + quantity, "reserved": item['reserved'] - quantity}
+            })
 
     # Delete the cart after restoring item counts
     db['carts'].delete_one({"user_id": user_id})
@@ -148,13 +141,15 @@ async def clear_cart(request: Request, user: dict = Depends(get_current_user)):
 
 @router.post('/cart/item/add/{item_id}/{quantity}', status_code=201)
 async def add_item_to_cart(item_id: str, quantity: int, user: dict = Depends(get_current_user)):
-    user_id = user['sub'] 
+    user_id = user['sub']
     item = db['items'].find_one({"_id": ObjectId(item_id)})
     if not item or item['count'] < quantity:
         raise HTTPException(status_code=400, detail="Item not available or insufficient stock")
 
-    # Update the item count in the inventory
-    db['items'].update_one({"_id": ObjectId(item_id)}, {"$set": {"count": item['count'] - quantity}})
+    # Update the item count and reserved in the inventory
+    db['items'].update_one({"_id": ObjectId(item_id)}, {
+        "$set": {"count": item['count'] - quantity, "reserved": item['reserved'] + quantity}
+    })
 
     # Update the cart
     cart = db['carts'].find_one({"user_id": user_id})
@@ -168,7 +163,7 @@ async def add_item_to_cart(item_id: str, quantity: int, user: dict = Depends(get
             cart_item = CartItem(
                 item_id=item_id,
                 name=item['name'],
-                count=quantity,  # Note: count here refers to quantity in cart
+                count=quantity,
                 reserved=item['reserved'],
                 price_per_unit=item['price_per_unit'],
                 description=item['description'],
@@ -199,24 +194,18 @@ async def create_order(request: Request, order_address: OrderAddress, user: dict
     if not cart:
         raise HTTPException(status_code=404, detail="Cart not found")
 
-    # Transform the cart items to the expected order items format
+    # Preparing order items and calculating total price
     order_items = [
         {
             "item_id": item["item_id"],
-            "name": item["name"],
-            "quantity": item["count"],  # Convert 'count' to 'quantity'
-            "unit_price": item["price_per_unit"],  # Convert 'price_per_unit' to 'unit_price'
-            # Add 'reserved' if it's required by your consumer, else remove it
-            "reserved": item.get("reserved", 0),
-            "description": item.get("description", ""),
-            "category": item.get("category", ""),
-            "available": item.get("available", False)
+            "quantity": item["count"],  # Quantity in cart
+            "unit_price": item["price_per_unit"],
         }
         for item in cart.get("items", [])
     ]
-
     total_price = sum(item["unit_price"] * item["quantity"] for item in order_items)
 
+    # Creating the order object
     order = {
         "user_id": user_id,
         "items": order_items,
@@ -224,17 +213,26 @@ async def create_order(request: Request, order_address: OrderAddress, user: dict
         "address": order_address.address
     }
 
-    # Convert order to JSON and send to RabbitMQ
-    order_json = json.dumps(order)
-    publish(order_json)  # Assuming rabbitmq.publish is properly set up
+    # Subtracting reserved items from the inventory
+    for cart_item in cart['items']:
+        item_id = cart_item['item_id']
+        quantity = cart_item['count']
+        item = db['items'].find_one({"_id": ObjectId(item_id)})
+        if item:
+            db['items'].update_one({"_id": ObjectId(item_id)}, {
+                "$inc": {"reserved": -quantity}
+            })
 
-    # Clear the user's cart
+    # Sending order to RabbitMQ and clearing the cart
+    order_json = json.dumps(order)
+    publish(order_json)
     db['carts'].delete_one({"user_id": user_id})
 
-    return templates.TemplateResponse("order_confirmation.html", {"request": request, "user": user})
+    return templates.TemplateResponse("orders.html", {"request": request, "user": user})
 
-@router.get("/orders")
-def get_user_orders(user: dict = Depends(get_current_user)):
+
+@router.get("/orders", response_class=HTMLResponse)
+async def get_user_orders(request: Request, user: dict = Depends(get_current_user)):
     user_id = user['sub']
     with grpc.insecure_channel("grpc-server:50051") as channel:
         stub = orders_pb2_grpc.OrderServiceStub(channel)
@@ -244,7 +242,7 @@ def get_user_orders(user: dict = Depends(get_current_user)):
             # Handle gRPC errors
             status_code = e.code()
             if status_code == grpc.StatusCode.NOT_FOUND:
-                raise HTTPException(status_code=404, detail=e.details())
+                raise HTTPException(status_code=404, detail="No orders found for this user.")
             else:
                 raise HTTPException(status_code=500, detail="Internal server error")
 
@@ -262,4 +260,5 @@ def get_user_orders(user: dict = Depends(get_current_user)):
             "order_date": order.order_date
         } for order in response.orders]
 
-        return orders
+        # Return the template response
+        return templates.TemplateResponse("orders.html", {"request": request, "user": user, "orders": orders})
