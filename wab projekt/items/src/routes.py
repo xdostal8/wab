@@ -1,11 +1,13 @@
 from fastapi import APIRouter, Depends, Request
 
 from .database import db
-from .models import Item, Cart, CartItem
+from .models import Item, Cart, CartItem, OrderAddress
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 import json
 from bson import json_util
+from .rabbitmq import publish
+
 
 
 
@@ -184,4 +186,46 @@ async def add_item_to_cart(item_id: str, quantity: int, user: dict = Depends(get
         ).dict()])
         db['carts'].insert_one(new_cart.dict())
     return {"message": "Item added to cart"}
+
+@router.post("/create-order", response_class=HTMLResponse)
+async def create_order(request: Request, order_address: OrderAddress, user: dict = Depends(get_current_user)):
+    user_id = user['sub']
+    cart = db['carts'].find_one({"user_id": user_id})
+    if not cart:
+        raise HTTPException(status_code=404, detail="Cart not found")
+
+    # Transform the cart items to the expected order items format
+    order_items = [
+        {
+            "item_id": item["item_id"],
+            "name": item["name"],
+            "quantity": item["count"],  # Convert 'count' to 'quantity'
+            "unit_price": item["price_per_unit"],  # Convert 'price_per_unit' to 'unit_price'
+            # Add 'reserved' if it's required by your consumer, else remove it
+            "reserved": item.get("reserved", 0),
+            "description": item.get("description", ""),
+            "category": item.get("category", ""),
+            "available": item.get("available", False)
+        }
+        for item in cart.get("items", [])
+    ]
+
+    total_price = sum(item["unit_price"] * item["quantity"] for item in order_items)
+
+    order = {
+        "user_id": user_id,
+        "items": order_items,
+        "total_price": total_price,
+        "address": order_address.address
+    }
+
+    # Convert order to JSON and send to RabbitMQ
+    order_json = json.dumps(order)
+    publish(order_json)  # Assuming rabbitmq.publish is properly set up
+
+    # Clear the user's cart
+    db['carts'].delete_one({"user_id": user_id})
+
+    return templates.TemplateResponse("order_confirmation.html", {"request": request, "user": user})
+
 

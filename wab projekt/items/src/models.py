@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import List
+from uuid import UUID
 
 
 class Item(BaseModel):
@@ -25,3 +26,6 @@ class Cart(BaseModel):
     user_id: str
     items: List[CartItem]
     total_price: float = Field(default=0.0)
+
+class OrderAddress(BaseModel):
+    address: str

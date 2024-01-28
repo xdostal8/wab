@@ -22,6 +22,34 @@
                 alert('Error clearing cart');
             }
         }
+
+        async function createOrder(event) {
+            event.preventDefault();
+            const address = document.getElementById('address').value;
+            const orderData = {
+                address: address
+            };
+            
+            try {
+                const response = await fetch('/create-order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(orderData)
+                });
+
+                if (response.ok) {
+                    alert('Order created successfully.');
+                    window.location.href = '/order-confirmation'; // Redirect to confirmation page
+                } else {
+                    throw new Error('Failed to create order');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error creating order');
+            }
+        }
     </script>
 </head>
 <body>
@@ -66,6 +94,13 @@
         <a href="/logout">Logout</a>
     {% else %}
         <p>Please <a href="/login">login</a> to view your cart.</p>
+    {% endif %}
+    {% if user and cart['items'] %}
+        <form id="orderForm" onsubmit="createOrder(event)">
+            <label for="address">Delivery Address:</label>
+            <input type="text" id="address" name="address" required>
+            <button type="submit">Place Order</button>
+        </form>
     {% endif %}
 
 </body>

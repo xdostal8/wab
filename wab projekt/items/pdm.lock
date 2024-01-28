@@ -5,7 +5,7 @@
 groups = ["default"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:4d667ee3b757b5cd64c71044a51aed0ccf52f0e06a1004e02ee6f8cb59918f34"
+content_hash = "sha256:0af66482314b12febc08206e5d724371780111ed5acc0cbe6cb4e4e4f550a5d8"
 
 [[package]]
 name = "annotated-types"
@@ -270,6 +270,16 @@ files = [
     {file = "MarkupSafe-2.1.4-cp312-cp312-win32.whl", hash = "sha256:f6be2d708a9d0e9b0054856f07ac7070fbe1754be40ca8525d5adccdbda8f475"},
     {file = "MarkupSafe-2.1.4-cp312-cp312-win_amd64.whl", hash = "sha256:5045e892cfdaecc5b4c01822f353cf2c8feb88a6ec1c0adef2a2e705eef0f656"},
     {file = "MarkupSafe-2.1.4.tar.gz", hash = "sha256:3aae9af4cac263007fd6309c64c6ab4506dd2b79382d9d19a1994f9240b8db4f"},
+]
+
+[[package]]
+name = "pika"
+version = "1.3.2"
+requires_python = ">=3.7"
+summary = "Pika Python AMQP Client Library"
+files = [
+    {file = "pika-1.3.2-py3-none-any.whl", hash = "sha256:0779a7c1fafd805672796085560d290213a465e4f6f76a6fb19e378d8041a14f"},
+    {file = "pika-1.3.2.tar.gz", hash = "sha256:b2a327ddddf8570b4965b3576ac77091b850262d34ce8c1d8cb4e4146aa4145f"},
 ]
 
 [[package]]

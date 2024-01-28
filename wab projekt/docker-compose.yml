@@ -1,33 +1,91 @@
-# Use root/example as user/password credentials
 version: '3.1'
 
 services:
+  rabbitmq:
+    image: rabbitmq:management
+    ports:
+      - 5672:5672
+      - 15672:15672
+    depends_on:
+      - fastapi_app_items
+      - db_orders
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=secret
+    networks:
+      - common_network
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
 
-  mongo:
+  mongo_items:
     image: mongo
     ports:
-      - 27017:27017
+      - 27018:27017  # Changed port to avoid conflict
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
+    networks:
+      - common_network
 
-  mongo-express:
+  mongo-express_items:
     image: mongo-express
     depends_on:
-      - mongo
+      - mongo_items
     ports:
-      - 27000:8081
+      - 27001:8081  # Changed port to avoid conflict
     environment:
       ME_CONFIG_BASICAUTH_USERNAME: root
       ME_CONFIG_BASICAUTH_PASSWORD: example
-      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
+      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo_items:27017/
+    networks:
+      - common_network
 
-  fastapi_app:
+  fastapi_app_items:
+    build: ./items # Specify the correct path
+    ports:
+      - "8000:8000"
     environment:
       - GOOGLE_CLIENT_ID=476984822533-s6526ehc2lbn5a0ma6clk6bbmepg5nb6.apps.googleusercontent.com
       - GOOGLE_CLIENT_SECRET=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
-    build: .
-    ports:
-      - "8000:8000"
     depends_on:
-      - mongo
+      - mongo_items
+    networks:
+      - common_network
+
+  db_orders:
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./orders/postgres:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "5433:5432"  # Changed port to avoid conflict
+    networks:
+      - common_network
+
+  adminer_orders:
+    image: adminer
+    ports:
+      - "8081:8080"  # Changed port to avoid conflict
+    depends_on:
+      - db_orders
+    networks:
+      - common_network
+
+  fastapi_app_orders:
+    build: ./orders  # Specify the correct path
+    ports:
+      - "8001:8001"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - common_network
+
+networks:
+  common_network:
+
