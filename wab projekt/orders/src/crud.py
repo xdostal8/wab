@@ -30,6 +30,10 @@ def insert_order(db: Session, order: schemas.OrderCreate) -> models.Order:
 def get_orders(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Order).offset(skip).limit(limit).all()
 
+def get_user_orders(db: Session, user_id: str, skip: int = 0, limit: int = 100):
+    return db.query(models.Order).filter(models.Order.user_id == user_id).offset(skip).limit(limit).all()
+
+
 
 def process_order_from_message(order_data: dict):
     db = SessionLocal()

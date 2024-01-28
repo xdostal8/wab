@@ -8,6 +8,11 @@ import json
 from bson import json_util
 from .rabbitmq import publish
 
+import grpc
+from . import orders_pb2
+from . import orders_pb2_grpc
+
+
 
 
 
@@ -228,4 +233,33 @@ async def create_order(request: Request, order_address: OrderAddress, user: dict
 
     return templates.TemplateResponse("order_confirmation.html", {"request": request, "user": user})
 
+@router.get("/orders")
+def get_user_orders(user: dict = Depends(get_current_user)):
+    user_id = user['sub']
+    with grpc.insecure_channel("grpc-server:50051") as channel:
+        stub = orders_pb2_grpc.OrderServiceStub(channel)
+        try:
+            response = stub.GetUserOrders(orders_pb2.UserOrderRequest(user_id=user_id))
+        except grpc.RpcError as e:
+            # Handle gRPC errors
+            status_code = e.code()
+            if status_code == grpc.StatusCode.NOT_FOUND:
+                raise HTTPException(status_code=404, detail=e.details())
+            else:
+                raise HTTPException(status_code=500, detail="Internal server error")
 
+        # Convert gRPC response to JSON format
+        orders = [{
+            "id": order.id,
+            "user_id": order.user_id,
+            "total_price": order.total_price,
+            "address": order.address,
+            "items": [{
+                "item_id": item.item_id,
+                "quantity": item.quantity,
+                "unit_price": item.unit_price
+            } for item in order.items],
+            "order_date": order.order_date
+        } for order in response.orders]
+
+        return orders

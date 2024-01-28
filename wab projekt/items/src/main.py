@@ -1,5 +1,5 @@
 import json
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi import APIRouter
 from starlette.config import Config
 from starlette.requests import Request
@@ -10,7 +10,6 @@ from authlib.integrations.starlette_client import OAuth
 from fastapi import HTTPException
 import os
 from .routes import router
-
 
 # OAuth settings
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
@@ -106,3 +105,4 @@ async def auth(request: Request):
 async def logout(request: Request):
     request.session.pop('user', None)
     return RedirectResponse(url='/')
+
