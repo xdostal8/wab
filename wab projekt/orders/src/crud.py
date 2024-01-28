@@ -1,6 +1,9 @@
 from sqlalchemy.orm import Session
-from . import models, schemas
+import models, schemas
 from uuid import uuid4
+from database import SessionLocal
+from schemas import OrderCreate
+
 
 def insert_order(db: Session, order: schemas.OrderCreate) -> models.Order:
     db_order = models.Order(
@@ -26,3 +29,17 @@ def insert_order(db: Session, order: schemas.OrderCreate) -> models.Order:
 
 def get_orders(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Order).offset(skip).limit(limit).all()
+
+
+def process_order_from_message(order_data: dict):
+    db = SessionLocal()
+    try:
+        db.begin()
+        order_schema = OrderCreate(**order_data)
+        insert_order(db, order_schema)
+        db.commit()
+    except Exception as e:
+        print(f"Error processing order: {e}")
+        db.rollback()
+    finally:
+        db.close()

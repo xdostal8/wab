@@ -76,7 +76,7 @@ services:
     networks:
       - common_network
 
-  fastapi_app_orders:
+  rabbitmq-worker:
     build: ./orders  # Specify the correct path
     ports:
       - "8001:8001"
@@ -85,6 +85,7 @@ services:
         condition: service_healthy
     networks:
       - common_network
+
 
 networks:
   common_network:
