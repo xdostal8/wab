@@ -7,7 +7,7 @@ from authlib.integrations.starlette_client import OAuth, OAuthError
 from authlib.integrations.starlette_client import OAuth
 from fastapi.templating import Jinja2Templates
 import os
-from .routes import router
+from .user_routes import router
 from starlette.config import Config
 
 

@@ -44,9 +44,25 @@ services:
       - common_network
 
   fastapi_app_items:
-    build: ./items # Specify the correct path
+    build:
+      context: ./items
+      dockerfile: Dockerfile.user
     ports:
       - "8000:8000"
+    environment:
+      - GOOGLE_CLIENT_ID=476984822533-s6526ehc2lbn5a0ma6clk6bbmepg5nb6.apps.googleusercontent.com
+      - GOOGLE_CLIENT_SECRET=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
+    depends_on:
+      - mongo_items
+    networks:
+      - common_network
+
+  fastapi_admin_items:
+    build:
+      context: ./items
+      dockerfile: Dockerfile.admin
+    ports:
+      - "8005:8005"
     environment:
       - GOOGLE_CLIENT_ID=476984822533-s6526ehc2lbn5a0ma6clk6bbmepg5nb6.apps.googleusercontent.com
       - GOOGLE_CLIENT_SECRET=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

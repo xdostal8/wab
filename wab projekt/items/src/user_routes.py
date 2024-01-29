@@ -10,6 +10,7 @@ import grpc
 from . import orders_pb2
 from . import orders_pb2_grpc
 from bson import ObjectId
+from fastapi import HTTPException
 
 
 
@@ -107,14 +108,6 @@ async def get_cart(request: Request, user: dict = Depends(get_current_user)):
 
 
     return templates.TemplateResponse("cart.html", {"request": request, "user": user, "cart": cart})
-
-
-
-
-
-
-from fastapi import HTTPException
-
 
 @router.delete('/cart')
 async def clear_cart(request: Request, user: dict = Depends(get_current_user)):

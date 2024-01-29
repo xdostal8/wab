@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home Page</title>
+    <title>Admin Dashboard</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -15,16 +15,18 @@
         .container {
             width: 80%;
             margin: auto;
-            text-align: center;        }
+            text-align: center;
+        }
         h1 {
             color: #333;
         }
-        .nav {
+        .admin-nav {
             margin-top: 20px;
             display: flex;
             justify-content: center;
-            align-items: center;        }
-        .nav a {
+            align-items: center;
+        }
+        .admin-nav a {
             text-decoration: none;
             color: #007bff;
             margin: 10px;
@@ -32,28 +34,25 @@
             border: 1px solid #007bff;
             border-radius: 5px;
         }
-        .nav a:hover {
+        .admin-nav a:hover {
             background-color: #007bff;
-            color: white;        }
+            color: white;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        {% if user %}
-        <h1>Welcome, {{ user['name'] }}!</h1>
-        {% else %}
-        <h1>Welcome to the Item Store</h1>
-        {% endif %}
-        <div class="nav">
-        {% if user %}
-            <a href="/items">Show Items</a><br>
-            <a href="/cart/">My Cart</a><br>
-            <a href="/orders">My Orders</a>
-            <a href="/logout">Logout</a><br>
-        {% else %}
-            <h1>Welcome to the Item Store</h1>
-            <a href="/login">Login</a><br>
-        {% endif %}
+        <h1>Admin Dashboard</h1>
+        <div class="admin-nav">
+            {% if user %}
+            <a href="/admin/new-item">Add New Item</a>
+            <a href="/admin/items">Manage Items</a>
+            <a href="/admin/orders">View Orders</a>
+            <a href="/logout">Logout</a>
+            {% else %}
+            <a href="/login">Login</a>
+            {% endif %}
+        </div>
     </div>
 </body>
 </html>
