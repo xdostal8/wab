@@ -23,7 +23,7 @@ services:
   mongo_items:
     image: mongo
     ports:
-      - 27018:27017  # Changed port to avoid conflict
+      - 27018:27017 
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
@@ -35,7 +35,7 @@ services:
     depends_on:
       - mongo_items
     ports:
-      - 27001:8081  # Changed port to avoid conflict
+      - 27001:8081
     environment:
       ME_CONFIG_BASICAUTH_USERNAME: root
       ME_CONFIG_BASICAUTH_PASSWORD: example
@@ -79,21 +79,21 @@ services:
     volumes:
       - ./orders/postgres:/docker-entrypoint-initdb.d:ro
     ports:
-      - "5433:5432"  # Changed port to avoid conflict
+      - "5433:5432"
     networks:
       - common_network
 
   adminer_orders:
     image: adminer
     ports:
-      - "8081:8080"  # Changed port to avoid conflict
+      - "8081:8080"
     depends_on:
       - db_orders
     networks:
       - common_network
 
   rabbitmq-worker:
-    build: ./orders  # Specify the correct path
+    build: ./orders
     ports:
       - "8001:8001"
     depends_on:
@@ -103,7 +103,7 @@ services:
       - common_network
 
   grpc-server:
-    build: ./orders/src  # Update this path to the directory containing the Dockerfile for gRPC server
+    build: ./orders/src
     ports:
       - "50051:50051"
     depends_on:
